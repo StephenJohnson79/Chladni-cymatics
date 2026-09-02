@@ -1,80 +1,106 @@
 # Chladni Plate / 克拉尼板
 
-一个纯黑白、可交互的 Chladni（克拉尼）板演示。项目完全包含在单个 `index.html` 中，不需要安装依赖、运行构建命令或连接服务器。
+An interactive study of resonance, nodal geometry, sound, and granular motion on a virtual square plate.
 
-An interactive monochrome Chladni plate demonstration. The complete experience is contained in one `index.html` file, with no dependencies, build step, or server required.
+一个关于方板共振、节点几何、声音与颗粒运动的互动研究。
 
-## 中文说明
+## Interactive Demo / 在线体验
 
-### 功能
+### [Open the interactive Chladni plate / 打开互动 Chladni 板](https://stephenjohnson79.github.io/chladni-cymatics/)
 
-- 黑色振动板与白色沙粒，实时显示节点线。
-- 桌面端约 7600 个粒子，移动端约 4400 个粒子。
-- Web Audio 生成与驱动频率同步的声音。
-- 中英文界面与双语公式说明。
-- 支持鼠标或触摸拖动板面，扰动粒子分布。
-- 自适应电脑和手机屏幕。
+The experience opens in a browser and includes synchronized audio, real-time particle motion, bilingual controls, equations, and model notes.
 
-### 控制
+点击上方链接即可在浏览器中体验同步声音、实时粒子运动、中英文控制、方程与模型说明。
 
-- 左侧圆形按钮：开启或关闭声音。浏览器要求用户主动点击后才能播放声音。
-- 第一个滑块：驱动频率，单位为 `Hz`。
-- 第二个滑块：共振品质因数 `Q`，无量纲。Q 越高，共振频带越窄，节点图案通常越清晰。
-- 第三个滑块：简并模态混合系数 `β`，无量纲，范围为 −1 到 +1。
-- 右上角 `中 / EN`：切换界面语言。
-- 右上角信息按钮：查看中英文方程、模型边界和学术参考。
+---
 
-### 在 GitHub Pages 上发布
+## 中文
 
-1. 新建一个 GitHub 仓库。
-2. 将本目录中的 `index.html` 和 `README.md` 上传到仓库根目录。
-3. 在仓库的 **Settings → Pages** 中选择 **Deploy from a branch**。
-4. 选择 `main` 分支和 `/ (root)` 目录，保存设置。
-5. 等待 GitHub 生成公开网址。
+### 项目简介
 
-也可以直接双击 `index.html`，在本地浏览器中运行。
+Chladni 图形让不可见的振动变得可见：当薄板在特定频率附近发生共振时，板面上的砂粒会逐渐迁移到位移接近零的节点线，形成与振动模态对应的几何图案。
 
-### 模型说明
+本项目将这一过程转化为实时浏览器体验。黑色板面上分布着数千颗白色粒子；驱动频率、共振品质因数和简并模态组合会共同改变节点结构。声音由 Web Audio 实时生成，并与驱动频率同步。
 
-演示以 Kirchhoff–Love 薄板方程为物理基础，并使用余弦模态基进行实时近似。真实自由边方板没有已知的简单闭式解，通常需要 Rayleigh–Ritz、有限差分或有限元方法。这里的粒子运动是对沙粒向节点线迁移的实时视觉近似，不是完整的颗粒接触力学模拟。每颗粒子具有略微不同的停驻阈值，并使用静摩擦式停驻和局部密度排斥，从而形成有限宽度的颗粒节点带，避免无限聚合到单一像素线上。
+### 交互方式
 
-方程、近似范围和参考文献均可通过页面右上角的信息按钮查看。
+- 圆形声音按钮用于开启或静音。受浏览器策略限制，声音必须通过一次主动点击启动。
+- 频率滑块控制驱动频率，单位为 `Hz`。
+- `Q` 滑块控制无量纲共振品质因数。较高的 Q 值对应更窄的共振频带和更明确的模态选择。
+- `β` 滑块控制无量纲简并模态混合系数，范围为 −1 到 +1，用于改变对称、单向和反对称模态组合。
+- 在板面上拖动可以扰动粒子，观察节点图案重新形成。
+- 右上角可切换中英文，并查看完整方程、模型边界和参考文献。
+
+### 物理与计算模型
+
+演示以 Kirchhoff–Love 薄板方程为物理基础：
+
+$$
+\rho h\frac{\partial^2 w}{\partial t^2}+D\nabla^4w=q(x,y,t),
+\qquad
+D=\frac{Eh^3}{12(1-\nu^2)}.
+$$
+
+实时计算采用余弦模态基，并以虚拟板参数将无量纲模态缩放到可听频率。方板中具有相同固有频率的 $(m,n)$ 与 $(n,m)$ 模态通过系数 $\beta$ 组合。受迫响应使用带阻尼的共振响应函数，使靠近固有频率的模态获得更高权重。
+
+粒子沿时间平均位移能量的梯度向节点区域迁移。为了避免所有粒子无限压缩到一条数学零线上，每颗粒子具有略微不同的停驻阈值，同时加入静摩擦式停驻、局部密度排斥和弱随机扰动，从而形成有限宽度的颗粒节点带。
+
+### 模型边界
+
+- 真实自由边方板没有已知的简单闭式解，通常需要 Rayleigh–Ritz、有限差分或有限元方法。
+- 本项目的余弦基是适合实时浏览器计算的模态近似，并不等同于真实自由边方板的精确频谱。
+- 粒子运动用于表现节点聚集现象，不是完整的颗粒碰撞、摩擦和空气耦合模拟。
+- 实际 Chladni 图形还会受到板材、厚度、边界约束、驱动位置、阻尼和粒径等因素影响。
+
+### 技术形式
+
+项目由一个独立的 `index.html` 构成，使用 Canvas 2D、Web Audio API 和原生 JavaScript。它不依赖外部库，支持桌面与移动浏览器。
+
+---
 
 ## English
 
-### Features
+### Overview
 
-- A black vibrating plate with white particles that reveal nodal lines in real time.
-- Approximately 7,600 particles on desktop and 4,400 on mobile.
-- Web Audio sound synchronized with the driving frequency.
-- Chinese/English interface and bilingual equation notes.
-- Mouse and touch interaction for disturbing the particle field.
-- Responsive layout for desktop and mobile screens.
+Chladni figures make otherwise invisible vibration visible. When a thin plate is driven near one of its resonant frequencies, grains on the surface migrate toward nodal lines—regions of nearly zero transverse displacement—and reveal the geometry of the corresponding vibration mode.
 
-### Controls
+This project translates that process into a real-time browser experience. Thousands of white particles move across a black virtual plate while driving frequency, resonance quality, and degenerate-mode composition reshape the nodal field. Sound is synthesized with Web Audio and remains synchronized with the driving frequency.
 
-- Circular button on the left: enables or mutes sound. Browsers require a user gesture before audio can begin.
-- First slider: driving frequency in `Hz`.
-- Second slider: dimensionless resonance quality factor `Q`. A higher Q creates a narrower resonance band and generally sharper nodal patterns.
-- Third slider: dimensionless degenerate-mode mixing coefficient `β`, ranging from −1 to +1.
-- `中 / EN` in the upper-right corner: switches the interface language.
-- Information button in the upper-right corner: opens the bilingual equations, model limitations, and academic references.
+### Interaction
 
-### Publish with GitHub Pages
+- The circular sound control enables or mutes audio. Browser autoplay policies require an explicit user gesture before sound can begin.
+- The frequency slider sets the driving frequency in `Hz`.
+- The `Q` slider controls the dimensionless resonance quality factor. A higher Q produces a narrower resonance bandwidth and more selective modal response.
+- The `β` slider controls the dimensionless degenerate-mode mixing coefficient from −1 to +1, shifting between symmetric, directional, and antisymmetric combinations.
+- Dragging across the plate disturbs the particles and reveals how the nodal pattern re-forms.
+- The controls in the upper-right corner switch language and open the equations, model boundaries, and references.
 
-1. Create a new GitHub repository.
-2. Upload `index.html` and `README.md` from this directory to the repository root.
-3. Open **Settings → Pages** and select **Deploy from a branch**.
-4. Choose the `main` branch and `/ (root)` folder, then save.
-5. Wait for GitHub to provide the public URL.
+### Physical and computational model
 
-You can also open `index.html` directly in a local browser.
+The simulation is grounded in the Kirchhoff–Love thin-plate equation:
 
-### Model note
+$$
+\rho h\frac{\partial^2 w}{\partial t^2}+D\nabla^4w=q(x,y,t),
+\qquad
+D=\frac{Eh^3}{12(1-\nu^2)}.
+$$
 
-The demonstration is grounded in Kirchhoff–Love thin-plate theory and uses a cosine modal basis for real-time approximation. No simple closed-form solution is known for the true free-edge square-plate problem; it is normally treated with Rayleigh–Ritz, finite-difference, or finite-element methods. Particle motion is a real-time visual approximation of migration toward nodal lines, not a complete granular-contact simulation. Each particle has a slightly different settling threshold, with static-friction-like settling and local density repulsion producing a finite-width granular nodal band instead of collapse onto a single pixel line.
+The real-time solver uses a cosine modal basis and an equivalent virtual-plate scale that places the dimensionless modes in the audible frequency range. Square-plate modes $(m,n)$ and $(n,m)$ with the same eigenfrequency are combined through the coefficient $\beta$. A damped forced-response function increases the contribution of modes near resonance.
 
-The equations, approximation boundaries, and academic references are available from the information button in the upper-right corner of the page.
+Particles migrate along the gradient of time-averaged displacement energy toward nodal regions. To prevent every particle from collapsing onto one mathematical zero line, each grain receives a slightly different settling threshold, together with static-friction-like settling, local density repulsion, and weak stochastic agitation. The result is a finite-width granular nodal band.
+
+### Scope and limitations
+
+- No simple closed-form solution is known for the true free-edge square-plate problem; it is normally treated with Rayleigh–Ritz, finite-difference, or finite-element methods.
+- The cosine basis used here is a real-time modal approximation, not the exact spectrum of a physical free-edge plate.
+- Particle dynamics visualize nodal accumulation rather than complete grain collision, friction, and air-coupling physics.
+- Physical Chladni figures also depend on material, thickness, constraints, drive position, damping, and grain size.
+
+### Technical format
+
+The project is contained in a standalone `index.html` built with Canvas 2D, the Web Audio API, and native JavaScript. It has no external runtime dependencies and supports desktop and mobile browsers.
+
+---
 
 ## References / 参考文献
 
