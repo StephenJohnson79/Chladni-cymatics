@@ -7,30 +7,29 @@
     <title>Chladni Plate</title>
     <style>
       * { box-sizing: border-box; }
-      html, body { margin: 0; min-height: 100%; background: #fff; color: #111; overscroll-behavior: none; }
+      html, body { margin: 0; min-height: 100%; background: #fff; color: #111; overscroll-behavior: none; overflow-x: clip; }
       body { font-family: Arial, Helvetica, sans-serif; }
-      main { width: 100%; min-height: 100svh; display: grid; grid-template-rows: minmax(0, 1fr) auto; place-items: center; gap: clamp(20px, 3.2vh, 34px); padding: clamp(24px, 5vh, 56px) 24px clamp(24px, 4vh, 42px); overflow: hidden; }
-      .plate-wrap { width: min(66vmin, 650px); aspect-ratio: 1; align-self: end; background: #000; filter: drop-shadow(0 18px 38px rgba(0,0,0,.09)); }
-      canvas { display: block; width: 100%; height: 100%; background: #000; cursor: crosshair; touch-action: none; }
-      .dock { width: min(900px, calc(100vw - 40px)); min-height: 74px; display: grid; grid-template-columns: 52px repeat(3, minmax(150px, 1fr)); align-items: center; gap: clamp(16px, 2.5vw, 30px); padding: 12px 22px 12px 12px; border: 1px solid rgba(0,0,0,.13); border-radius: 999px; background: rgba(255,255,255,.94); box-shadow: 0 12px 40px rgba(0,0,0,.055); backdrop-filter: blur(16px); }
+      main { width: 100%; min-height: 100svh; display: grid; grid-template-rows: minmax(0, 1fr) auto; place-items: center; gap: clamp(20px, 3.2vh, 34px); padding: clamp(24px, 5vh, 56px) 24px clamp(24px, 4vh, 42px); overflow: visible; }
+      .plate-wrap { position: relative; z-index: 0; width: min(66vmin, 650px); aspect-ratio: 1; align-self: end; background: transparent; transform: translateY(clamp(-42px, -4vh, -28px)); }
+      #plate { position: absolute; inset: -25%; width: 150%; height: 150%; cursor: crosshair; touch-action: none; }
+      #plate canvas { display: block; width: 100%; height: 100%; background: transparent; }
+      .dock { position: relative; z-index: 2; width: min(960px, calc(100vw - 40px)); min-height: 88px; display: grid; grid-template-columns: 52px repeat(3, minmax(170px, 1fr)); align-items: center; gap: clamp(18px, 2.5vw, 32px); padding: 12px 24px 12px 12px; border: 1px solid rgba(0,0,0,.13); border-radius: 999px; background: rgba(255,255,255,.94); box-shadow: 0 12px 40px rgba(0,0,0,.055); backdrop-filter: blur(16px); }
       .sound { width: 50px; height: 50px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #111; cursor: pointer; transition: transform 160ms ease; }
       .sound:hover { transform: scale(1.04); }
       .sound:active { transform: scale(.97); }
-      .speaker { width: 19px; height: 18px; position: relative; }
-      .speaker::before { content: ''; position: absolute; left: 1px; top: 6px; width: 5px; height: 7px; background: #fff; border-radius: 1px; }
-      .speaker::after { content: ''; position: absolute; left: 5px; top: 3px; width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-right: 7px solid #fff; }
-      .wave { position: absolute; right: 0; top: 4px; width: 7px; height: 10px; border-right: 1.5px solid #fff; border-radius: 50%; opacity: 0; }
-      .sound[data-on='true'] .wave { opacity: 1; }
-      .sound[data-on='false'] .speaker { transform: translateX(2px); }
-      .sound[data-on='false'] .speaker span:first-child { position: absolute; z-index: 2; left: 11px; top: 2px; width: 1.5px; height: 15px; background: #fff; transform: rotate(45deg); }
-      .group { display: grid; grid-template-columns: 20px minmax(70px,1fr) 54px; align-items: center; gap: 10px; }
-      output { font-size: 10px; line-height: 1; letter-spacing: .02em; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; color: rgba(0,0,0,.62); }
+      .sound-icon { width: 23px; height: 23px; overflow: visible; fill: none; stroke: #fff; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+      .sound-icon .sound-waves, .sound-icon .mute-slash { transition: opacity 150ms ease; }
+      .sound[data-on='false'] .sound-waves, .sound[data-on='true'] .mute-slash { opacity: 0; }
+      .sound[data-on='true'] .sound-waves, .sound[data-on='false'] .mute-slash { opacity: 1; }
+      .group { min-width: 0; display: grid; grid-template-columns: minmax(0,1fr) auto; grid-template-areas: 'name value' 'slider slider'; align-items: center; column-gap: 12px; row-gap: 6px; }
+      .parameter-name { grid-area: name; overflow: hidden; font-size: 10px; line-height: 1.1; letter-spacing: .025em; white-space: nowrap; text-overflow: ellipsis; color: rgba(0,0,0,.72); }
+      output { grid-area: value; font-size: 10px; line-height: 1.1; letter-spacing: .02em; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; color: rgba(0,0,0,.52); }
       .glyph { width: 17px; height: 17px; position: relative; }
       .glyph.wave-lines { background: repeating-linear-gradient(90deg, transparent 0 2px, #111 2px 3px, transparent 3px 5px); clip-path: polygon(0 42%,15% 25%,30% 55%,45% 5%,60% 80%,75% 30%,100% 48%,100% 58%,75% 40%,60% 95%,45% 18%,30% 68%,15% 38%,0 55%); }
       .glyph.pulse::before { content: ''; position: absolute; inset: 7px 0; border-top: 1.4px solid #111; transform: skewY(-34deg); }
       .glyph.dot::before { content: ''; position: absolute; inset: 2px; border: 1.3px solid #111; border-radius: 50%; }
       .glyph.dot::after { content: ''; position: absolute; width: 3px; height: 3px; left: 7px; top: 7px; border-radius: 50%; background: #111; }
-      input[type='range'] { width: 100%; height: 22px; margin: 0; appearance: none; background: transparent; cursor: pointer; }
+      input[type='range'] { grid-area: slider; width: 100%; height: 18px; margin: 0; appearance: none; background: transparent; cursor: pointer; }
       input[type='range']::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(to right, #111 0 var(--fill), rgba(0,0,0,.16) var(--fill) 100%); }
       input[type='range']::-webkit-slider-thumb { appearance: none; width: 13px; height: 13px; margin-top: -5.5px; border: 1.5px solid #111; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px #fff; transition: transform 140ms ease, background 140ms ease; }
       input[type='range']::-moz-range-track { height: 2px; background: rgba(0,0,0,.16); }
@@ -39,11 +38,11 @@
       input[type='range']:hover::-webkit-slider-thumb, input[type='range']:active::-webkit-slider-thumb { transform: scale(1.22); background: #111; }
       button:focus-visible, input:focus-visible { outline: 2px solid #111; outline-offset: 3px; }
       .top-tools { position: fixed; z-index: 10; top: max(18px, env(safe-area-inset-top)); right: max(18px, env(safe-area-inset-right)); display: flex; align-items: center; gap: 8px; }
-      .language, .info-button, .close-button { height: 34px; border: 1px solid rgba(0,0,0,.16); background: rgba(255,255,255,.92); color: #111; cursor: pointer; backdrop-filter: blur(14px); }
-      .language { display: flex; align-items: center; gap: 5px; padding: 0 11px; border-radius: 999px; font-size: 10px; letter-spacing: .04em; }
-      .language .divider { opacity: .25; }
-      .language [data-code] { opacity: .32; transition: opacity 150ms ease; }
-      .language [data-active='true'] { opacity: 1; }
+      .view-toggle, .language, .info-button, .close-button { height: 34px; border: 1px solid rgba(0,0,0,.16); background: rgba(255,255,255,.92); color: #111; cursor: pointer; backdrop-filter: blur(14px); }
+      .view-toggle, .language { display: flex; align-items: center; gap: 5px; padding: 0 11px; border-radius: 999px; font-size: 10px; letter-spacing: .04em; }
+      .view-toggle .divider, .language .divider { opacity: .25; }
+      .view-toggle [data-view-code], .language [data-code] { opacity: .32; transition: opacity 150ms ease; }
+      .view-toggle [data-active='true'], .language [data-active='true'] { opacity: 1; }
       .info-button, .close-button { width: 34px; padding: 0; border-radius: 50%; display: grid; place-items: center; }
       .info-glyph { width: 14px; height: 14px; position: relative; border: 1px solid #111; border-radius: 50%; }
       .info-glyph::before { content: ''; position: absolute; left: 6px; top: 5px; width: 1px; height: 5px; background: #111; }
@@ -67,28 +66,31 @@
       .references a { color: #111; text-decoration-color: rgba(0,0,0,.3); text-underline-offset: 3px; }
       @media (max-width: 720px) {
         main { gap: 28px; padding: 24px 18px 26px; }
-        .plate-wrap { width: min(86vw, 58svh); }
-        .dock { width: min(430px, calc(100vw - 28px)); min-height: 138px; grid-template-columns: 52px 1fr; grid-template-rows: repeat(3,1fr); gap: 8px 20px; padding: 12px 22px 12px 12px; border-radius: 34px; }
+        .plate-wrap { width: min(86vw, 58svh); transform: translateY(-22px); }
+        .dock { width: min(430px, calc(100vw - 28px)); min-height: 190px; grid-template-columns: 52px 1fr; grid-template-rows: repeat(3,1fr); gap: 8px 20px; padding: 14px 22px 14px 12px; border-radius: 34px; }
         .sound { grid-row: 1 / 4; }
-        .group { min-height: 32px; grid-template-columns: 18px minmax(90px,1fr) 52px; }
+        .group { min-height: 46px; }
         .top-tools { top: max(12px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); }
       }
     </style>
   </head>
   <body>
     <div class="top-tools">
+      <button class="view-toggle" id="viewToggle" type="button" aria-label="切换到 2D 俯视模式">
+        <span data-view-code="2d" data-active="false">2D</span><span class="divider">/</span><span data-view-code="3d" data-active="true">3D</span>
+      </button>
       <button class="language" id="language" type="button" aria-label="Switch to English">
         <span data-code="zh" data-active="true">中</span><span class="divider">/</span><span data-code="en" data-active="false">EN</span>
       </button>
       <button class="info-button" id="infoButton" type="button" aria-label="打开模型说明"><span class="info-glyph" aria-hidden="true"></span></button>
     </div>
     <main>
-      <div class="plate-wrap"><canvas id="plate" aria-label="Interactive Chladni plate"></canvas></div>
+      <div class="plate-wrap"><div id="plate" role="img" aria-label="Interactive Chladni plate"></div></div>
       <div class="dock">
-        <button class="sound" id="sound" data-on="false" aria-label="Play sound" aria-pressed="false"><span class="speaker"><span></span><span class="wave"></span></span></button>
-        <div class="group"><i class="glyph wave-lines" aria-hidden="true"></i><input id="frequency" type="range" min="110" max="1600" value="292" aria-label="驱动频率" /><output id="frequencyValue">292 Hz</output></div>
-        <div class="group"><i class="glyph pulse" aria-hidden="true"></i><input id="quality" type="range" min="7" max="48" value="24" aria-label="共振品质因数" /><output id="qualityValue">Q 24</output></div>
-        <div class="group"><i class="glyph dot" aria-hidden="true"></i><input id="symmetry" type="range" min="-100" max="100" value="100" aria-label="简并模态混合系数" /><output id="symmetryValue">β +1.00</output></div>
+        <button class="sound" id="sound" data-on="false" aria-label="播放声音" aria-pressed="false"><svg class="sound-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.25 9.25h3.6L12.75 5v14l-4.9-4.25h-3.6z"/><g class="sound-waves"><path d="M16 9.1c1.55 1.6 1.55 4.2 0 5.8"/><path d="M18.7 6.65c2.9 2.95 2.9 7.75 0 10.7"/></g><path class="mute-slash" d="M5 5l14 14"/></svg></button>
+        <div class="group"><label class="parameter-name" id="frequencyLabel" for="frequency">驱动频率</label><input id="frequency" type="range" min="110" max="1600" value="292" aria-label="驱动频率" /><output id="frequencyValue" for="frequency">292 Hz</output></div>
+        <div class="group"><label class="parameter-name" id="qualityLabel" for="quality">共振品质因数 Q</label><input id="quality" type="range" min="7" max="48" value="24" aria-label="共振品质因数" /><output id="qualityValue" for="quality">24 · 无量纲</output></div>
+        <div class="group"><label class="parameter-name" id="symmetryLabel" for="symmetry">简并模态混合 β</label><input id="symmetry" type="range" min="-100" max="100" value="100" aria-label="简并模态混合系数" /><output id="symmetryValue" for="symmetry">+1.00 · 无量纲</output></div>
       </div>
     </main>
     <dialog id="infoDialog" aria-labelledby="infoTitleZh">
@@ -150,9 +152,9 @@
         </section>
       </div>
     </dialog>
-    <script>
-      const canvas = document.querySelector('#plate');
-      const ctx = canvas.getContext('2d');
+    <script type="module">
+      import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js';
+      const stage = document.querySelector('#plate');
       const frequency = document.querySelector('#frequency');
       const quality = document.querySelector('#quality');
       const symmetry = document.querySelector('#symmetry');
@@ -160,11 +162,16 @@
       const frequencyValue = document.querySelector('#frequencyValue');
       const qualityValue = document.querySelector('#qualityValue');
       const symmetryValue = document.querySelector('#symmetryValue');
+      const frequencyLabel = document.querySelector('#frequencyLabel');
+      const qualityLabel = document.querySelector('#qualityLabel');
+      const symmetryLabel = document.querySelector('#symmetryLabel');
+      const plateWrap = document.querySelector('.plate-wrap');
+      const viewToggle = document.querySelector('#viewToggle');
       const languageButton = document.querySelector('#language');
       const infoButton = document.querySelector('#infoButton');
       const infoDialog = document.querySelector('#infoDialog');
       const closeInfo = document.querySelector('#closeInfo');
-      let language = 'zh';
+      let language = 'zh', viewMode = '3d';
       const GRID = 129, F0 = 22.5;
       const modes = [];
       for (let m = 1; m <= 9; m++) for (let n = m; n <= 9; n++) {
@@ -235,11 +242,56 @@
           y: ((i * .5698402909980532) % 1) * 1.96 - .98 + (Math.random()-.5)*.004,
           vx: 0, vy: 0, seed: (i*.61803398875)%1
         }));
+        syncParticleGeometry();
+      }
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(41,1,.1,40);
+      const renderer = new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'high-performance'});
+      const particleGeometry = new THREE.BufferGeometry();
+      let particlePositions = new Float32Array(0);
+      const textureCanvas=document.createElement('canvas'), textureCtx=textureCanvas.getContext('2d');
+      textureCanvas.width=textureCanvas.height=32;
+      const grainGradient=textureCtx.createRadialGradient(13,11,2,16,16,15);
+      grainGradient.addColorStop(0,'rgba(255,255,255,1)'); grainGradient.addColorStop(.48,'rgba(255,255,255,.96)'); grainGradient.addColorStop(.78,'rgba(255,255,255,.72)'); grainGradient.addColorStop(1,'rgba(255,255,255,0)');
+      textureCtx.fillStyle=grainGradient; textureCtx.fillRect(0,0,32,32);
+      const particleMaterial = new THREE.PointsMaterial({color:0xffffff,map:new THREE.CanvasTexture(textureCanvas),transparent:true,alphaTest:.08,depthWrite:true,sizeAttenuation:false});
+      const particleCloud = new THREE.Points(particleGeometry,particleMaterial);
+      particleCloud.frustumCulled=false;
+      const raycaster=new THREE.Raycaster(), pointerNdc=new THREE.Vector2(), hitPoint=new THREE.Vector3(), interactionPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
+      const cameraFromPosition=new THREE.Vector3(), cameraFromQuaternion=new THREE.Quaternion(), cameraToPosition=new THREE.Vector3(), cameraToQuaternion=new THREE.Quaternion();
+      let cameraTransitionStart=0, cameraTransitioning=false, cameraFromFov=41, cameraToFov=41;
+      function cameraPose(mode) {
+        const probe=new THREE.PerspectiveCamera();
+        if(mode==='2d'){probe.position.set(0,11.625,.0015);probe.up.set(0,0,-1);}else{probe.position.set(4.2,11.4,8.55);probe.up.set(0,1,0);}
+        probe.lookAt(0,0,0); return {position:probe.position.clone(),quaternion:probe.quaternion.clone(),fov:mode==='2d'?41:34};
+      }
+      function startCameraTransition() {
+        const target=cameraPose(viewMode);
+        if(matchMedia('(prefers-reduced-motion: reduce)').matches){camera.position.copy(target.position);camera.quaternion.copy(target.quaternion);camera.fov=target.fov;camera.updateProjectionMatrix();cameraTransitioning=false;return;}
+        cameraFromPosition.copy(camera.position); cameraFromQuaternion.copy(camera.quaternion); cameraToPosition.copy(target.position); cameraToQuaternion.copy(target.quaternion); cameraFromFov=camera.fov; cameraToFov=target.fov; cameraTransitionStart=performance.now(); cameraTransitioning=true;
+      }
+      function syncParticleGeometry() {
+        particlePositions=new Float32Array(particles.length*3);
+        particleGeometry.setAttribute('position',new THREE.BufferAttribute(particlePositions,3));
+      }
+      function initScene() {
+        renderer.setClearColor(0xffffff,0); renderer.outputColorSpace=THREE.SRGBColorSpace; renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+        stage.appendChild(renderer.domElement);
+        scene.add(new THREE.HemisphereLight(0xffffff,0x323232,1.65));
+        const key=new THREE.DirectionalLight(0xffffff,2.4); key.position.set(-3,7,4); key.castShadow=true; key.shadow.mapSize.set(1024,1024); scene.add(key);
+        const plateMaterial=new THREE.MeshStandardMaterial({color:0x050505,roughness:.7,metalness:.2});
+        const plate=new THREE.Mesh(new THREE.BoxGeometry(5,0.065,5),plateMaterial); plate.position.y=-.0325; plate.receiveShadow=true; scene.add(plate);
+        const metal=new THREE.MeshStandardMaterial({color:0xc9cbd0,roughness:.2,metalness:.95});
+        const base=new THREE.Mesh(new THREE.CylinderGeometry(.072,.078,.038,24),metal); base.position.y=.019; base.castShadow=true; scene.add(base);
+        const stud=new THREE.Mesh(new THREE.CylinderGeometry(.046,.055,.075,24),metal); stud.position.y=.075; stud.castShadow=true; scene.add(stud);
+        const cap=new THREE.Mesh(new THREE.SphereGeometry(.051,20,10),metal); cap.scale.y=.62; cap.position.y=.126; cap.castShadow=true; scene.add(cap);
+        scene.add(particleCloud);
+        const initial=cameraPose(viewMode); camera.position.copy(initial.position); camera.quaternion.copy(initial.quaternion); camera.fov=initial.fov; camera.updateProjectionMatrix();
       }
       function resize() {
-        const rect = canvas.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
-        width = rect.width; height = rect.height; canvas.width = Math.round(width*dpr); canvas.height = Math.round(height*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-        if (!particles.length) reset();
+        const rect=stage.getBoundingClientRect(), dpr=Math.min(devicePixelRatio||1,2);
+        width=Math.max(1,rect.width); height=Math.max(1,rect.height); renderer.setPixelRatio(dpr); renderer.setSize(width,height,false);
+        camera.aspect=width/height; camera.updateProjectionMatrix(); particleMaterial.size=dpr*(width<500?1.12:1.36);
       }
       function draw(time) {
         const pull = .001 + resonance * .0032, agitation = .000065 + (1-resonance) * .00015, damping = .895;
@@ -249,8 +301,8 @@
           const dy = Math.max(0, Math.min(DENSITY-1, ((p.y+1)*.5*DENSITY)|0));
           densityMap[dy*DENSITY+dx]++;
         }
-        ctx.fillStyle='#000'; ctx.fillRect(0,0,width,height); ctx.strokeStyle='rgba(255,255,255,.18)'; ctx.lineWidth=1; ctx.strokeRect(3.5,3.5,width-7,height-7); ctx.fillStyle='rgba(255,255,255,.9)';
-        for (const p of particles) {
+        for (let i=0;i<particles.length;i++) {
+          const p=particles[i];
           const phase=time*.0017+p.seed*Math.PI*2;
           const energy = sample(fieldMap,p.x,p.y);
           const target = nodeBand * (.3 + p.seed * 1.15);
@@ -270,22 +322,29 @@
           const localDamping = settled ? .76 : damping;
           p.vx*=localDamping;p.vy*=localDamping;p.x+=p.vx;p.y+=p.vy;
           if(p.x<-.99||p.x>.99){p.x=Math.max(-.99,Math.min(.99,p.x));p.vx*=-.52;} if(p.y<-.99||p.y>.99){p.y=Math.max(-.99,Math.min(.99,p.y));p.vy*=-.52;}
-          const size = width < 500 ? .56 : .68;
-          ctx.fillRect((p.x+1)/2*(width-16)+8,(p.y+1)/2*(height-16)+8,size,size);
+          const activity=settled?.05:Math.min(1,Math.abs(offset)/(nodeBand*7));
+          const hop=viewMode==='3d'?Math.max(0,Math.sin(phase*4.2))*(.018+activity*.118)*(.68+resonance*.48):0;
+          particlePositions[i*3]=p.x*2.46; particlePositions[i*3+1]=.045+hop; particlePositions[i*3+2]=p.y*2.46;
         }
+        particleGeometry.attributes.position.needsUpdate=true;
+        if(cameraTransitioning){const elapsed=Math.min(1,(time-cameraTransitionStart)/900),ease=elapsed<.5?4*elapsed*elapsed*elapsed:1-Math.pow(-2*elapsed+2,3)/2;camera.position.lerpVectors(cameraFromPosition,cameraToPosition,ease);camera.quaternion.slerpQuaternions(cameraFromQuaternion,cameraToQuaternion,ease);camera.fov=cameraFromFov+(cameraToFov-cameraFromFov)*ease;camera.updateProjectionMatrix();if(elapsed===1)cameraTransitioning=false;}
+        renderer.render(scene,camera);
         requestAnimationFrame(draw);
       }
       function setFill(input){ input.style.setProperty('--fill', ((input.value-input.min)/(input.max-input.min)*100)+'%'); }
       function updateValues() {
         const beta = Math.sin(+symmetry.value / 100 * Math.PI / 2);
         frequencyValue.textContent = `${frequency.value} Hz`;
-        qualityValue.textContent = `Q ${quality.value}`;
-        symmetryValue.textContent = `β ${beta >= 0 ? '+' : '−'}${Math.abs(beta).toFixed(2)}`;
+        qualityValue.textContent = language === 'zh' ? `${quality.value} · 无量纲` : `${quality.value} · dimensionless`;
+        symmetryValue.textContent = `${beta >= 0 ? '+' : '−'}${Math.abs(beta).toFixed(2)} · ${language === 'zh' ? '无量纲' : 'dimensionless'}`;
       }
       function updateLanguage() {
         document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
         document.querySelectorAll('[data-code]').forEach(item => item.dataset.active = String(item.dataset.code === language));
         document.querySelectorAll('.info-copy').forEach(copy => copy.hidden = copy.dataset.lang !== language);
+        frequencyLabel.textContent = language === 'zh' ? '驱动频率' : 'Driving frequency';
+        qualityLabel.textContent = language === 'zh' ? '共振品质因数 Q' : 'Resonance quality factor Q';
+        symmetryLabel.textContent = language === 'zh' ? '简并模态混合 β' : 'Degenerate-mode mixing β';
         languageButton.setAttribute('aria-label', language === 'zh' ? 'Switch to English' : '切换到中文');
         infoButton.setAttribute('aria-label', language === 'zh' ? '打开模型说明' : 'Open model notes');
         closeInfo.setAttribute('aria-label', language === 'zh' ? '关闭' : 'Close');
@@ -293,7 +352,17 @@
         quality.setAttribute('aria-label', language === 'zh' ? '共振品质因数' : 'Resonance quality factor');
         symmetry.setAttribute('aria-label', language === 'zh' ? '简并模态混合系数' : 'Degenerate-mode mixing coefficient');
         infoDialog.setAttribute('aria-labelledby', language === 'zh' ? 'infoTitleZh' : 'infoTitleEn');
+        updateSoundLabel();
+        updateView();
+        updateValues();
       }
+      function updateView() {
+        plateWrap.dataset.view=viewMode;
+        document.querySelectorAll('[data-view-code]').forEach(item => item.dataset.active=String(item.dataset.viewCode===viewMode));
+        viewToggle.setAttribute('aria-label', language === 'zh' ? (viewMode==='3d'?'切换到 2D 俯视模式':'切换到 3D 透视模式') : (viewMode==='3d'?'Switch to 2D top view':'Switch to 3D perspective view'));
+        stage.setAttribute('aria-label', language === 'zh' ? `互动 Chladni 板，${viewMode.toUpperCase()} 模式` : `Interactive Chladni plate, ${viewMode.toUpperCase()} mode`);
+      }
+      function updateSoundLabel(){sound.setAttribute('aria-label',language==='zh'?(soundOn?'静音':'播放声音'):(soundOn?'Mute sound':'Play sound'));}
       function updateAudio() {
         if(!audio) return;
         const t=audio.context.currentTime, v=soundOn ? .015 + resonance * .018 : 0;
@@ -303,17 +372,18 @@
         audio.overGain.gain.setTargetAtTime(v*.16,t,.05);
       }
       [frequency,quality,symmetry].forEach(input => input.addEventListener('input', () => { setFill(input); updateValues(); queueRebuild(); }));
+      viewToggle.addEventListener('click',()=>{viewMode=viewMode==='3d'?'2d':'3d';updateView();startCameraTransition();});
       languageButton.addEventListener('click', () => { language = language === 'zh' ? 'en' : 'zh'; updateLanguage(); });
       infoButton.addEventListener('click', () => infoDialog.showModal());
       closeInfo.addEventListener('click', () => infoDialog.close());
       infoDialog.addEventListener('click', event => { if (event.target === infoDialog) infoDialog.close(); });
       sound.addEventListener('click', async () => {
         if(!audio){ const context=new AudioContext(),osc=context.createOscillator(),over=context.createOscillator(),gain=context.createGain(),overGain=context.createGain(),master=context.createGain(); osc.type=over.type='sine';osc.frequency.value=+frequency.value;over.frequency.value=+frequency.value*2.003;gain.gain.value=overGain.gain.value=0;master.gain.value=.72;osc.connect(gain).connect(master);over.connect(overGain).connect(master);master.connect(context.destination);osc.start();over.start();audio={context,osc,over,gain,overGain}; }
-        if(audio.context.state==='suspended') await audio.context.resume(); soundOn=!soundOn; sound.dataset.on=String(soundOn);sound.setAttribute('aria-pressed',String(soundOn));sound.setAttribute('aria-label',soundOn?'Mute sound':'Play sound'); updateAudio();
+        if(audio.context.state==='suspended') await audio.context.resume(); soundOn=!soundOn; sound.dataset.on=String(soundOn);sound.setAttribute('aria-pressed',String(soundOn));updateSoundLabel();updateAudio();
       });
-      function updatePointer(event){const r=canvas.getBoundingClientRect();pointer.x=(event.clientX-r.left)/r.width*2-1;pointer.y=(event.clientY-r.top)/r.height*2-1;pointer.active=true;}
-      canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);updatePointer(e);});canvas.addEventListener('pointermove',e=>{if(e.buttons)updatePointer(e);});canvas.addEventListener('pointerup',()=>pointer.active=false);canvas.addEventListener('pointercancel',()=>pointer.active=false);
-      [frequency,quality,symmetry].forEach(setFill);updateValues();updateLanguage();addEventListener('resize',resize);resize();rebuildField();requestAnimationFrame(draw);
+      function updatePointer(event){const r=renderer.domElement.getBoundingClientRect();pointerNdc.set((event.clientX-r.left)/r.width*2-1,-((event.clientY-r.top)/r.height*2-1));raycaster.setFromCamera(pointerNdc,camera);if(raycaster.ray.intersectPlane(interactionPlane,hitPoint)){pointer.x=Math.max(-1,Math.min(1,hitPoint.x/2.5));pointer.y=Math.max(-1,Math.min(1,hitPoint.z/2.5));pointer.active=true;}}
+      renderer.domElement.addEventListener('pointerdown',e=>{renderer.domElement.setPointerCapture(e.pointerId);updatePointer(e);});renderer.domElement.addEventListener('pointermove',e=>{if(e.buttons)updatePointer(e);});renderer.domElement.addEventListener('pointerup',()=>pointer.active=false);renderer.domElement.addEventListener('pointercancel',()=>pointer.active=false);
+      initScene();reset();resize();[frequency,quality,symmetry].forEach(setFill);updateValues();updateLanguage();addEventListener('resize',resize);rebuildField();requestAnimationFrame(draw);
     </script>
   </body>
 </html>

@@ -29,7 +29,8 @@ Chladni 图形让不可见的振动变得可见：当薄板在特定频率附近
 - `Q` 滑块控制无量纲共振品质因数。较高的 Q 值对应更窄的共振频带和更明确的模态选择。
 - `β` 滑块控制无量纲简并模态混合系数，范围为 −1 到 +1，用于改变对称、单向和反对称模态组合。
 - 在板面上拖动可以扰动粒子，观察节点图案重新形成。
-- 右上角可切换中英文，并查看完整方程、模型边界和参考文献。
+- 右上角可在纯俯视 `2D` 与带透视、中央激振棒和粒子跳跃的 `3D` 视图之间切换。
+- 右上角还可切换中英文，并查看完整方程、模型边界和参考文献。
 
 ### 物理与计算模型
 
@@ -50,11 +51,12 @@ $$
 - 真实自由边方板没有已知的简单闭式解，通常需要 Rayleigh–Ritz、有限差分或有限元方法。
 - 本项目的余弦基是适合实时浏览器计算的模态近似，并不等同于真实自由边方板的精确频谱。
 - 粒子运动用于表现节点聚集现象，不是完整的颗粒碰撞、摩擦和空气耦合模拟。
+- `3D` 模式中的透视、激振棒和离板高度用于呈现空间关系；它们是基于局部振动能量的可视化，不是板与激振装置的刚体动力学求解。
 - 实际 Chladni 图形还会受到板材、厚度、边界约束、驱动位置、阻尼和粒径等因素影响。
 
 ### 技术形式
 
-项目由一个独立的 `index.html` 构成，使用 Canvas 2D、Web Audio API 和原生 JavaScript。它不依赖外部库，支持桌面与移动浏览器。
+项目由一个独立的 `index.html` 构成，使用 Three.js/WebGL、Web Audio API 和原生 JavaScript。Three.js 以固定版本从 CDN 加载，其余部分无需外部运行时依赖；页面支持桌面与移动浏览器。
 
 ---
 
@@ -73,7 +75,8 @@ This project translates that process into a real-time browser experience. Thousa
 - The `Q` slider controls the dimensionless resonance quality factor. A higher Q produces a narrower resonance bandwidth and more selective modal response.
 - The `β` slider controls the dimensionless degenerate-mode mixing coefficient from −1 to +1, shifting between symmetric, directional, and antisymmetric combinations.
 - Dragging across the plate disturbs the particles and reveals how the nodal pattern re-forms.
-- The controls in the upper-right corner switch language and open the equations, model boundaries, and references.
+- The upper-right control switches between a pure top-down `2D` view and a perspective `3D` view with a central exciter rod and subtly airborne grains.
+- The remaining upper-right controls switch language and open the equations, model boundaries, and references.
 
 ### Physical and computational model
 
@@ -94,11 +97,12 @@ Particles migrate along the gradient of time-averaged displacement energy toward
 - No simple closed-form solution is known for the true free-edge square-plate problem; it is normally treated with Rayleigh–Ritz, finite-difference, or finite-element methods.
 - The cosine basis used here is a real-time modal approximation, not the exact spectrum of a physical free-edge plate.
 - Particle dynamics visualize nodal accumulation rather than complete grain collision, friction, and air-coupling physics.
+- Perspective, exciter geometry, and grain height in `3D` mode communicate spatial relationships; they are energy-driven visualizations rather than a rigid-body solution of the plate and excitation apparatus.
 - Physical Chladni figures also depend on material, thickness, constraints, drive position, damping, and grain size.
 
 ### Technical format
 
-The project is contained in a standalone `index.html` built with Canvas 2D, the Web Audio API, and native JavaScript. It has no external runtime dependencies and supports desktop and mobile browsers.
+The project is contained in a standalone `index.html` built with Three.js/WebGL, the Web Audio API, and native JavaScript. Three.js is loaded from a pinned CDN version; the rest of the experience has no external runtime dependencies. Desktop and mobile browsers are supported.
 
 ---
 
