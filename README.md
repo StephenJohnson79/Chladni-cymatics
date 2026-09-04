@@ -6,7 +6,7 @@ An interactive study of resonance, nodal geometry, sound, and granular motion on
 
 ## Interactive Demo / 在线体验
 
-### [Open the interactive Chladni plate / 打开互动 Chladni 板](https://stephenjohnson79.github.io/chladni-cymatics/)
+### [Open the interactive Chladni plate / 打开互动 Chladni 板](https://stephenjohnson79.github.io/Chladni-cymatics/)
 
 The experience opens in a browser and includes synchronized audio, real-time particle motion, bilingual controls, equations, and model notes.
 
